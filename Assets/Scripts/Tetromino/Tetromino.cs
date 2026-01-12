@@ -16,6 +16,28 @@ public abstract class Tetromino
     public int z;
     public int y;
     public int x;
-    public bool[,,] shape;
     public Type type;
+
+    public bool[,,] Shape
+    {
+        get
+        {
+            return _shapes[_isLying, _rotate];
+        }
+    }
+
+    public void Rotate(int n)
+    {
+        _rotate = ((_rotate + n) + 4) % 4;
+    }
+
+    public void Lie()
+    {
+        _isLying = 1 - _isLying;
+    }
+
+    // isLying: 0(세움) 1(누움), rotate: 0~3
+    protected int _isLying;
+    protected int _rotate;
+    protected bool[,][,,] _shapes;
 }

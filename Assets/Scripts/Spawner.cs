@@ -1,7 +1,5 @@
 // 1. 미노를 생성 및 반환
 // 2. 다음 미노를 관리
-using UnityEngine;
-
 public class Spawner
 {
 

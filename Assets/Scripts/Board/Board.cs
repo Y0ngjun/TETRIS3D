@@ -32,6 +32,7 @@ public class Board
         if (!FallMino())
         {
             LockMino();
+            BoardCheck();
 
             if (!SpawnMino())
             {
@@ -44,9 +45,9 @@ public class Board
 
     public bool CheckMino(Tetromino mino)
     {
-        int shapeDepth = mino.shape.GetLength(0);
-        int shapeHeight = mino.shape.GetLength(1);
-        int shapeWidth = mino.shape.GetLength(2);
+        int shapeDepth = mino.Shape.GetLength(0);
+        int shapeHeight = mino.Shape.GetLength(1);
+        int shapeWidth = mino.Shape.GetLength(2);
 
         for (int z = 0; z < shapeDepth; z++)
         {
@@ -54,7 +55,7 @@ public class Board
             {
                 for (int x = 0; x < shapeWidth; x++)
                 {
-                    if (mino.shape[z, y, x])
+                    if (mino.Shape[z, y, x])
                     {
                         int boardZ = mino.z + z;
                         int boardY = mino.y + y;
@@ -77,9 +78,9 @@ public class Board
 
     private void DeleteMino(Tetromino mino)
     {
-        int shapeDepth = mino.shape.GetLength(0);
-        int shapeHeight = mino.shape.GetLength(1);
-        int shapeWidth = mino.shape.GetLength(2);
+        int shapeDepth = mino.Shape.GetLength(0);
+        int shapeHeight = mino.Shape.GetLength(1);
+        int shapeWidth = mino.Shape.GetLength(2);
 
         for (int z = 0; z < shapeDepth; z++)
         {
@@ -87,7 +88,7 @@ public class Board
             {
                 for (int x = 0; x < shapeWidth; x++)
                 {
-                    if (mino.shape[z, y, x])
+                    if (mino.Shape[z, y, x])
                     {
                         int boardZ = mino.z + z;
                         int boardY = mino.y + y;
@@ -102,9 +103,9 @@ public class Board
 
     private void DrawMino(Tetromino mino)
     {
-        int shapeDepth = mino.shape.GetLength(0);
-        int shapeHeight = mino.shape.GetLength(1);
-        int shapeWidth = mino.shape.GetLength(2);
+        int shapeDepth = mino.Shape.GetLength(0);
+        int shapeHeight = mino.Shape.GetLength(1);
+        int shapeWidth = mino.Shape.GetLength(2);
 
         for (int z = 0; z < shapeDepth; z++)
         {
@@ -112,7 +113,7 @@ public class Board
             {
                 for (int x = 0; x < shapeWidth; x++)
                 {
-                    if (mino.shape[z, y, x])
+                    if (mino.Shape[z, y, x])
                     {
                         int boardZ = mino.z + z;
                         int boardY = mino.y + y;
@@ -152,11 +153,9 @@ public class Board
             DrawMino(_tetromino);
             return true;
         }
-        else
-        {
-            _tetromino.y--;
-            DrawMino(_tetromino);
-        }
+
+        _tetromino.y--;
+        DrawMino(_tetromino);
 
         return false;
     }
@@ -164,5 +163,140 @@ public class Board
     private void LockMino()
     {
         _tetromino = null;
+    }
+
+    public bool MoveHorizontal(int dx, int dz)
+    {
+        DeleteMino(_tetromino);
+
+        _tetromino.x += dx;
+        _tetromino.z += dz;
+
+        if (CheckMino(_tetromino))
+        {
+            DrawMino(_tetromino);
+            return true;
+        }
+
+        _tetromino.x -= dx;
+        _tetromino.z -= dz;
+
+        DrawMino(_tetromino);
+
+        return false;
+    }
+
+    public bool RotateBlock()
+    {
+        DeleteMino(_tetromino);
+
+        _tetromino.Rotate(1);
+
+        if (CheckMino(_tetromino))
+        {
+            DrawMino(_tetromino);
+            return true;
+        }
+
+        _tetromino.Rotate(-1);
+
+        DrawMino(_tetromino);
+        return false;
+    }
+
+    public bool ToggleLie()
+    {
+        DeleteMino(_tetromino);
+
+        _tetromino.Lie();
+
+        if (CheckMino(_tetromino))
+        {
+            DrawMino(_tetromino);
+            return true;
+        }
+
+        _tetromino.Lie();
+
+        DrawMino(_tetromino);
+        return false;
+    }
+
+    public bool SoftDrop()
+    {
+        return FallMino();
+    }
+
+    public bool HardDrop()
+    {
+        while (FallMino()) ;
+        GameManager.Instance.GameUpdate();
+
+        return true;
+    }
+
+    private void BoardCheck()
+    {
+        for (int y = 0; y < Height; y++)
+        {
+            for (int z = 0; z < Depth; z++)
+            {
+                if (LineCheck(y, z))
+                {
+                    LineDown(y, z);
+                }
+            }
+        }
+    }
+
+    private bool FloorCheck(int y)
+    {
+        for (int z = 0; z < Depth; z++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                if (LogicBoard[z, y, x] == Tetromino.Type.Empty)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void FloorDown(int y)
+    {
+        for (int z = 0; z < Depth; z++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                LogicBoard[z, y, x] = (y > 0 ? LogicBoard[z, y - 1, x] : Tetromino.Type.Empty);
+            }
+        }
+    }
+
+    private bool LineCheck(int y, int z)
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            if (LogicBoard[z, y, x] == Tetromino.Type.Empty)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void LineDown(int y, int z)
+    {
+        for (int floor = y; floor >= 0; floor--)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                LogicBoard[z, floor, x] = (floor > 0 ? LogicBoard[z, floor - 1, x] : Tetromino.Type.Empty);
+            }
+        }
     }
 }
