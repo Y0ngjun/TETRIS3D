@@ -1,19 +1,36 @@
+// 1. 미노를 생성 및 반환
+// 2. 다음 미노를 관리
 using UnityEngine;
 
-public class Spawner : MonoBehaviour
+public class Spawner
 {
-    void Start()
-    {
 
+    private Tetromino _nextMino;
+    private Board _gameBoard;
+
+    public Spawner()
+    {
+        _nextMino = TetrominoFactory.CreateRandom();
     }
 
-    void Update()
+    public void Init()
     {
-
+        _gameBoard = GameManager.Instance.GameBoard;
     }
 
-    public Tetromino Spawn()
+    public Tetromino Spawn(int spawnZ, int spawnY, int spawnX)
     {
+        Tetromino mino = _nextMino;
+        mino.z = spawnZ;
+        mino.y = spawnY;
+        mino.x = spawnX;
 
+        if (!_gameBoard.CheckMino(mino))
+        {
+            return null;
+        }
+
+        _nextMino = TetrominoFactory.CreateRandom();
+        return mino;
     }
 }

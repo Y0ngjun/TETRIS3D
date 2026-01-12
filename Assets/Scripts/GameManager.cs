@@ -1,3 +1,5 @@
+// 1. 게임 흐름 관리
+// 2. tick 관리
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -9,16 +11,17 @@ public class GameManager : MonoBehaviour
         GameOver
     }
 
-    public static GameManager Instance;
+    public static GameManager Instance { get; private set; }
 
-    public GameState State { get; private set; }
-    public Spawner spawner;
-    public Board board;
+    // 인스펙터에서 변경하기 위해 public
     public float tick = 1.0f;
+    public BoardRenderer boardRenderer;
 
-    private Tetromino tetromino;
-    private float tickTime = 0.0f;
-    private int score = 0;
+    public Board GameBoard { get; private set; }
+    public Spawner MinoSpawner { get; private set; }
+    public GameState State { get; private set; }
+
+    private float _tickTime = 0.0f;
 
     private void Awake()
     {
@@ -32,41 +35,37 @@ public class GameManager : MonoBehaviour
         }
 
         State = GameState.Playing;
+        GameBoard = new Board();
+        MinoSpawner = new Spawner();
+    }
+
+    private void Start()
+    {
+        MinoSpawner.Init();
+        GameBoard.Init();
+        boardRenderer.RenderUpdate();
     }
 
     private void Update()
     {
         if (State == GameState.Playing)
         {
-            tickTime += Time.deltaTime;
+            _tickTime += Time.deltaTime;
 
-            if (tickTime > tick)
+            if (_tickTime > tick)
             {
-                tickTime -= tick;
+                _tickTime -= tick;
                 GameUpdate();
+                boardRenderer.RenderUpdate();
             }
         }
     }
 
     private void GameUpdate()
     {
-        if (tetromino == null)
+        if (!GameBoard.BoardUpdate())
         {
-            tetromino = spawner.Spawn();
-
-            if (tetromino == null)
-            {
-                // GameOver
-                State = GameState.GameOver;
-                return;
-            }
-        }
-
-        if (!tetromino.Fall())
-        {
-            // tetromino Lock
-            tetromino.Lock();
-            board.Check();
+            State = GameState.GameOver;
         }
     }
 }
