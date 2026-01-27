@@ -6,19 +6,25 @@ public class Board
     public int Height { get; private set; }
     public int Width { get; private set; }
     public Tetromino.Type[,,] LogicBoard { get; private set; }
+    public Tetromino CurrentMino { get; private set; }
 
+    private const int MINO_SHAPE_SIZE = 4;
     private Spawner _spawner = null;
-    private Tetromino _tetromino = null;
-    private int _spawnZ = 0;
-    private int _spawnY = 0;
-    private int _spawnX = 3;
+    private int _spawnZ;
+    private int _spawnY;
+    private int _spawnX;
 
     public Board()
     {
-        Depth = 10;
+        Depth = 8;
         Height = 20;
-        Width = 10;
+        Width = 8;
         LogicBoard = new Tetromino.Type[Depth, Height, Width];
+
+        // minoShape Size 변경 시 4 <= 변경 필요
+        _spawnZ = (Depth - MINO_SHAPE_SIZE) / 2;
+        _spawnY = 0;
+        _spawnX = (Width - MINO_SHAPE_SIZE) / 2;
     }
 
     public void Init()
@@ -27,20 +33,22 @@ public class Board
         SpawnMino();
     }
 
-    public bool BoardUpdate()
+    public int BoardUpdate()
     {
+        int clear = 0;
+
         if (!FallMino())
         {
             LockMino();
-            BoardCheck();
+            clear = BoardCheck();
 
             if (!SpawnMino())
             {
-                return false;
+                return -1;
             }
         }
 
-        return true;
+        return clear;
     }
 
     public bool CheckMino(Tetromino mino)
@@ -128,97 +136,99 @@ public class Board
 
     private bool SpawnMino()
     {
-        if (_tetromino == null)
+        if (CurrentMino == null)
         {
-            _tetromino = _spawner.Spawn(_spawnZ, _spawnY, _spawnX);
+            CurrentMino = _spawner.Spawn(_spawnZ, _spawnY, _spawnX);
 
-            if (_tetromino == null)
+            if (CurrentMino == null)
             {
                 return false;
             }
         }
 
-        DrawMino(_tetromino);
+        DrawMino(CurrentMino);
 
         return true;
     }
 
     private bool FallMino()
     {
-        DeleteMino(_tetromino);
-        _tetromino.y++;
+        DeleteMino(CurrentMino);
+        CurrentMino.y++;
 
-        if (CheckMino(_tetromino))
+        if (CheckMino(CurrentMino))
         {
-            DrawMino(_tetromino);
+            DrawMino(CurrentMino);
+            GameManager.Instance.Falling();
+
             return true;
         }
 
-        _tetromino.y--;
-        DrawMino(_tetromino);
+        CurrentMino.y--;
+        DrawMino(CurrentMino);
 
         return false;
     }
 
     private void LockMino()
     {
-        _tetromino = null;
+        CurrentMino = null;
     }
 
     public bool MoveHorizontal(int dx, int dz)
     {
-        DeleteMino(_tetromino);
+        DeleteMino(CurrentMino);
 
-        _tetromino.x += dx;
-        _tetromino.z += dz;
+        CurrentMino.x += dx;
+        CurrentMino.z += dz;
 
-        if (CheckMino(_tetromino))
+        if (CheckMino(CurrentMino))
         {
-            DrawMino(_tetromino);
+            DrawMino(CurrentMino);
             return true;
         }
 
-        _tetromino.x -= dx;
-        _tetromino.z -= dz;
+        CurrentMino.x -= dx;
+        CurrentMino.z -= dz;
 
-        DrawMino(_tetromino);
+        DrawMino(CurrentMino);
 
         return false;
     }
 
     public bool RotateBlock()
     {
-        DeleteMino(_tetromino);
+        DeleteMino(CurrentMino);
 
-        _tetromino.Rotate(1);
+        CurrentMino.Rotate(1);
 
-        if (CheckMino(_tetromino))
+        if (CheckMino(CurrentMino))
         {
-            DrawMino(_tetromino);
+            DrawMino(CurrentMino);
             return true;
         }
 
-        _tetromino.Rotate(-1);
+        CurrentMino.Rotate(-1);
 
-        DrawMino(_tetromino);
+        DrawMino(CurrentMino);
         return false;
     }
 
-    public bool ToggleLie()
+    public bool ChangeLying()
     {
-        DeleteMino(_tetromino);
+        DeleteMino(CurrentMino);
 
-        _tetromino.Lie();
+        CurrentMino.ChangePlane(1);
 
-        if (CheckMino(_tetromino))
+        if (CheckMino(CurrentMino))
         {
-            DrawMino(_tetromino);
+            DrawMino(CurrentMino);
             return true;
         }
 
-        _tetromino.Lie();
+        CurrentMino.ChangePlane(-1);
 
-        DrawMino(_tetromino);
+        DrawMino(CurrentMino);
         return false;
     }
 
@@ -235,18 +245,30 @@ public class Board
         return true;
     }
 
-    private void BoardCheck()
+    private int BoardCheck()
     {
+        int clear = 0;
+        //for (int y = 0; y < Height; y++)
+        //{
+        //    for (int z = 0; z < Depth; z++)
+        //    {
+        //        if (LineCheck(y, z))
+        //        {
+        //            LineDown(y, z);
+        //        }
+        //    }
+        //}
+
         for (int y = 0; y < Height; y++)
         {
-            for (int z = 0; z < Depth; z++)
+            if (FloorCheck(y))
             {
-                if (LineCheck(y, z))
-                {
-                    LineDown(y, z);
-                }
+                clear++;
+                FloorDown(y);
             }
         }
+
+        return clear;
     }
 
     private bool FloorCheck(int y)
@@ -267,11 +289,14 @@ public class Board
 
     private void FloorDown(int y)
     {
-        for (int z = 0; z < Depth; z++)
+        for (; y >= 0; y--)
         {
-            for (int x = 0; x < Width; x++)
+            for (int z = 0; z < Depth; z++)
             {
-                LogicBoard[z, y, x] = (y > 0 ? LogicBoard[z, y - 1, x] : Tetromino.Type.Empty);
+                for (int x = 0; x < Width; x++)
+                {
+                    LogicBoard[z, y, x] = (y > 0 ? LogicBoard[z, y - 1, x] : Tetromino.Type.Empty);
+                }
             }
         }
     }
@@ -298,5 +323,53 @@ public class Board
                 LogicBoard[z, floor, x] = (floor > 0 ? LogicBoard[z, floor - 1, x] : Tetromino.Type.Empty);
             }
         }
+    }
+
+    public bool IsCurrentMinoAt(int z, int y, int x)
+    {
+        if (CurrentMino == null) return false;
+
+        int localZ = z - CurrentMino.z;
+        int localY = y - CurrentMino.y;
+        int localX = x - CurrentMino.x;
+        var shape = CurrentMino.Shape;
+
+        if (localZ < 0 || localZ >= shape.GetLength(0) ||
+            localY < 0 || localY >= shape.GetLength(1) ||
+            localX < 0 || localX >= shape.GetLength(2))
+        {
+            return false;
+        }
+
+        return shape[localZ, localY, localX];
+    }
+
+    public int GetGhostY()
+    {
+        if (CurrentMino == null) return -1;
+
+        DeleteMino(CurrentMino);
+
+        int originY = CurrentMino.y;
+        int ghostY = CurrentMino.y;
+
+        while (true)
+        {
+            CurrentMino.y++;
+
+            if (CheckMino(CurrentMino))
+            {
+                ghostY++;
+            }
+            else
+            {
+                CurrentMino.y = originY;
+                DrawMino(CurrentMino);
+
+                break;
+            }
+        }
+
+        return ghostY;
     }
 }

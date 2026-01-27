@@ -18,26 +18,26 @@ public abstract class Tetromino
     public int x;
     public Type type;
 
+    // currentPlane: 0(xy) 1(xz) 2(yz), rotate: 0~3
+    protected int _currentPlane;
+    protected int _rotate;
+    protected bool[,][,,] _shapes;
+
     public bool[,,] Shape
     {
         get
         {
-            return _shapes[_isLying, _rotate];
+            return _shapes[_currentPlane, _rotate];
         }
     }
 
     public void Rotate(int n)
     {
-        _rotate = ((_rotate + n) + 4) % 4;
+        _rotate = (_rotate + n + 4) % 4;
     }
 
-    public void Lie()
+    public void ChangePlane(int n)
     {
-        _isLying = 1 - _isLying;
+        _currentPlane = (_currentPlane + n + 3) % 3;
     }
-
-    // isLying: 0(세움) 1(누움), rotate: 0~3
-    protected int _isLying;
-    protected int _rotate;
-    protected bool[,][,,] _shapes;
 }

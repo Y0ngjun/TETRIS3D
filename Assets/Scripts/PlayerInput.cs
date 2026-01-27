@@ -2,26 +2,32 @@ using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
-    public bool moveRight { get; private set; }
-    public bool moveLeft { get; private set; }
-    public bool moveForward { get; private set; }
-    public bool moveBackward { get; private set; }
+    public bool MoveRight { get; private set; }
+    public bool MoveLeft { get; private set; }
+    public bool MoveForward { get; private set; }
+    public bool MoveBackward { get; private set; }
 
-    public bool rotateBlock { get; private set; }
-    public bool toggleLie { get; private set; }
-    public bool softDrop { get; private set; }
-    public bool hardDrop { get; private set; }
+    public bool RotateBlock { get; private set; }
+    public bool ChangeLying { get; private set; }
+    public bool SoftDrop { get; private set; }
+    public bool HardDrop { get; private set; }
+
+    public bool RotateCameraRight { get; private set; }
+    public bool RotateCameraLeft { get; private set; }
 
     void Update()
     {
-        moveRight = Input.GetKeyDown(KeyCode.D);
-        moveLeft = Input.GetKeyDown(KeyCode.A);
-        moveForward = Input.GetKeyDown(KeyCode.W);
-        moveBackward = Input.GetKeyDown(KeyCode.S);
+        MoveRight = Input.GetKeyDown(KeyCode.D);
+        MoveLeft = Input.GetKeyDown(KeyCode.A);
+        MoveForward = Input.GetKeyDown(KeyCode.W);
+        MoveBackward = Input.GetKeyDown(KeyCode.S);
 
-        rotateBlock = Input.GetKeyDown(KeyCode.J);
-        toggleLie = Input.GetKeyDown(KeyCode.K);
-        softDrop = Input.GetKeyDown(KeyCode.L);
-        hardDrop = Input.GetKeyDown(KeyCode.Space);
+        RotateBlock = Input.GetKeyDown(KeyCode.J);
+        ChangeLying = Input.GetKeyDown(KeyCode.K);
+        SoftDrop = Input.GetKeyDown(KeyCode.L);
+        HardDrop = Input.GetKeyDown(KeyCode.Space);
+
+        RotateCameraRight = Input.GetKeyDown(KeyCode.E);
+        RotateCameraLeft = Input.GetKeyDown(KeyCode.Q);
     }
 }

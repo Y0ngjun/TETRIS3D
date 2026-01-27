@@ -2,6 +2,7 @@
 // 2. 다음 미노를 관리
 public class Spawner
 {
+    public int NextBlockIndex => (int)_nextMino.type - 1;
 
     private Tetromino _nextMino;
     private Board _gameBoard;
@@ -29,6 +30,7 @@ public class Spawner
         }
 
         _nextMino = TetrominoFactory.CreateRandom();
+        UIManager.Instance.UpdateNextBlockUI();
         return mino;
     }
 }

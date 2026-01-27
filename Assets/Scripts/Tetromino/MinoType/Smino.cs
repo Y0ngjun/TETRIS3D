@@ -3,10 +3,10 @@ public class Smino : Tetromino
     public Smino()
     {
         type = Type.S;
-        _isLying = 0;
+        _currentPlane = 0;
         _rotate = 0;
 
-        _shapes = new bool[2, 4][,,];
+        _shapes = new bool[3, 4][,,];
 
         // 세워진 상태 (isLying = 0)
         // 회전 0
@@ -230,6 +230,122 @@ public class Smino : Tetromino
             },
             {
                 { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            }
+        };
+
+        // 회전 0
+        _shapes[2, 0] = new bool[4, 4, 4]
+        {
+            {
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { true, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            }
+        };
+
+        // 회전 1
+        _shapes[2, 1] = new bool[4, 4, 4]
+        {
+            {
+                { false, false, false, false },
+                { true, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { true, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            }
+        };
+
+        // 회전 2
+        _shapes[2, 2] = new bool[4, 4, 4]
+        {
+            {
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { true, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            }
+        };
+
+        // 회전 3
+        _shapes[2, 3] = new bool[4, 4, 4]
+        {
+            {
+                { false, false, false, false },
+                { true, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { true, false, false, false },
+                { true, false, false, false },
+                { false, false, false, false },
+                { false, false, false, false }
+            },
+            {
+                { false, false, false, false },
                 { false, false, false, false },
                 { false, false, false, false },
                 { false, false, false, false }
